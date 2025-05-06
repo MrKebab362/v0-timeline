@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { format } from "date-fns"
 import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
@@ -19,7 +19,11 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
   const [selectedBlock, setSelectedBlock] = useState<TimeBlock | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [timeBlocks, setTimeBlocks] = useState<TimeBlock[]>(data)
+  const [openHoverCardId, setOpenHoverCardId] = useState<string | null>(null)
   const { theme } = useTheme()
+
+  // Ref to track if mouse is over a block
+  const blockRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
   // Update timeBlocks when data changes
   if (JSON.stringify(data) !== JSON.stringify(timeBlocks)) {
@@ -118,6 +122,44 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
     setTimeBlocks(timeBlocks.map((block) => (block.id === updatedBlock.id ? updatedBlock : block)))
   }
 
+  // Handle mouse enter on block
+  const handleMouseEnter = (block: TimeBlock) => {
+    setHoveredBlock(block)
+    setOpenHoverCardId(block.id)
+  }
+
+  // Handle mouse leave on block
+  const handleMouseLeave = () => {
+    setHoveredBlock(null)
+    setOpenHoverCardId(null)
+  }
+
+  // Add global mouse move listener to check if mouse is over any block
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      let isOverAnyBlock = false
+
+      // Check if mouse is over any of our blocks
+      blockRefs.current.forEach((element) => {
+        const rect = element.getBoundingClientRect()
+        if (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+          isOverAnyBlock = true
+        }
+      })
+
+      // If not over any block, close any open hover card
+      if (!isOverAnyBlock) {
+        setOpenHoverCardId(null)
+      }
+    }
+
+    window.addEventListener("mousemove", handleGlobalMouseMove)
+
+    return () => {
+      window.removeEventListener("mousemove", handleGlobalMouseMove)
+    }
+  }, [])
+
   return (
     <>
       <motion.div
@@ -148,9 +190,23 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
 
               <AnimatePresence>
                 {timeBlocks.map((block) => (
-                  <HoverCard key={block.id} openDelay={0} closeDelay={0}>
+                  <HoverCard
+                    key={block.id}
+                    open={openHoverCardId === block.id}
+                    onOpenChange={(open) => {
+                      if (open) {
+                        setOpenHoverCardId(block.id)
+                      } else if (openHoverCardId === block.id) {
+                        setOpenHoverCardId(null)
+                      }
+                    }}
+                  >
                     <HoverCardTrigger asChild>
                       <motion.div
+                        ref={(el) => {
+                          if (el) blockRefs.current.set(block.id, el)
+                          else blockRefs.current.delete(block.id)
+                        }}
                         className={`absolute h-full rounded-md cursor-pointer transition-all ${
                           block.categoryId === "idle"
                             ? "hover:opacity-80"
@@ -160,8 +216,8 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
                           ...getBlockStyle(block),
                           background: getCategoryColor(block.categoryId),
                         }}
-                        onMouseEnter={() => setHoveredBlock(block)}
-                        onMouseLeave={() => setHoveredBlock(null)}
+                        onMouseEnter={() => handleMouseEnter(block)}
+                        onMouseLeave={handleMouseLeave}
                         onClick={() => handleBlockClick(block)}
                         layoutId={`block-${block.id}`}
                         transition={{
@@ -174,7 +230,13 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
                         whileTap={{ scale: 0.98 }}
                       />
                     </HoverCardTrigger>
-                    <HoverCardContent side="top" align="center" className="w-80" asChild>
+                    <HoverCardContent
+                      side="top"
+                      align="center"
+                      className="w-80"
+                      asChild
+                      forceMount={openHoverCardId === block.id}
+                    >
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
