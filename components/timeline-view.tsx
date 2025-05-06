@@ -25,6 +25,12 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
   // Ref to track if mouse is over a block
   const blockRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
+  // Ref to store the hover timer
+  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Hover delay in milliseconds (300ms is a good balance)
+  const HOVER_DELAY = 300
+
   // Update timeBlocks when data changes
   if (JSON.stringify(data) !== JSON.stringify(timeBlocks)) {
     setTimeBlocks(data)
@@ -125,12 +131,29 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
   // Handle mouse enter on block
   const handleMouseEnter = (block: TimeBlock) => {
     setHoveredBlock(block)
-    setOpenHoverCardId(block.id)
+
+    // Clear any existing timer
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current)
+    }
+
+    // Set a new timer to show the tooltip after the delay
+    hoverTimerRef.current = setTimeout(() => {
+      setOpenHoverCardId(block.id)
+    }, HOVER_DELAY)
   }
 
   // Handle mouse leave on block
   const handleMouseLeave = () => {
     setHoveredBlock(null)
+
+    // Clear the hover timer
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current)
+      hoverTimerRef.current = null
+    }
+
+    // Immediately hide the tooltip
     setOpenHoverCardId(null)
   }
 
@@ -147,8 +170,12 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
         }
       })
 
-      // If not over any block, close any open hover card
+      // If not over any block, clear timer and close any open hover card
       if (!isOverAnyBlock) {
+        if (hoverTimerRef.current) {
+          clearTimeout(hoverTimerRef.current)
+          hoverTimerRef.current = null
+        }
         setOpenHoverCardId(null)
       }
     }
@@ -157,6 +184,10 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
 
     return () => {
       window.removeEventListener("mousemove", handleGlobalMouseMove)
+      // Clean up any timers when component unmounts
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current)
+      }
     }
   }, [])
 
@@ -195,7 +226,7 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
                     open={openHoverCardId === block.id}
                     onOpenChange={(open) => {
                       if (open) {
-                        setOpenHoverCardId(block.id)
+                        // Don't set open here - let the timer handle it
                       } else if (openHoverCardId === block.id) {
                         setOpenHoverCardId(null)
                       }
