@@ -45,6 +45,9 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
   const startHour = viewType === "day" ? 6 : 0 // 6am for day view, Monday (0) for week view
   const totalHours = viewType === "day" ? 18 : 5 // 18 hours (6am-midnight) for day, 5 days for week
 
+  // Gap between blocks (in percentage of timeline width)
+  const blockGap = 0.2
+
   const getBlockStyle = (block: TimeBlock) => {
     // For day view, calculate position based on time
     if (viewType === "day") {
@@ -54,12 +57,17 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
       const startHourDecimal = startTime.getHours() + startTime.getMinutes() / 60
       const endHourDecimal = endTime.getHours() + endTime.getMinutes() / 60
 
+      // Calculate position with gap
       const startPosition = ((startHourDecimal - startHour) / totalHours) * 100
-      const width = ((endHourDecimal - startHourDecimal) / totalHours) * 100
+
+      // Adjust width to account for gap
+      const rawWidth = ((endHourDecimal - startHourDecimal) / totalHours) * 100
+      const width = Math.max(0, rawWidth - blockGap)
 
       return {
         left: `${startPosition}%`,
-        width: `${width}%`,
+        width: `calc(${width}% - 2px)`,
+        margin: "0 1px",
       }
     } else {
       // For week view, calculate position based on day of week
@@ -68,11 +76,15 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
 
       const dayOfWeek = startTime.getDay() - 1 // 0 = Monday
       const startPosition = (dayOfWeek / totalHours) * 100
-      const width = (1 / totalHours) * 100 // Each day is 1/5 of the timeline
+
+      // Adjust width to account for gap
+      const rawWidth = (1 / totalHours) * 100 // Each day is 1/5 of the timeline
+      const width = Math.max(0, rawWidth - blockGap)
 
       return {
         left: `${startPosition}%`,
-        width: `${width}%`,
+        width: `calc(${width}% - 2px)`,
+        margin: "0 1px",
       }
     }
   }
