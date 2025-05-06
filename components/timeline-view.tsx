@@ -129,7 +129,7 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
         <div className="p-6">
           <div className="relative h-24 w-full">
             {/* Timeline blocks */}
-            <div className="absolute inset-0 border rounded-md bg-muted/20 dark:bg-muted/10">
+            <div className="absolute inset-0 rounded-md bg-muted/20 dark:bg-muted/10">
               {/* Background pattern for empty slots */}
               <div className="absolute inset-0 opacity-5 dark:opacity-10">
                 <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -153,8 +153,8 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
                       <motion.div
                         className={`absolute h-full rounded-md cursor-pointer transition-all ${
                           block.categoryId === "idle"
-                            ? "border border-border/10 hover:border-border/30 hover:opacity-80"
-                            : "border border-border/40 shadow-sm hover:shadow-md hover:translate-y-[-1px] hover:opacity-90"
+                            ? "hover:opacity-80"
+                            : "shadow-sm hover:shadow-md hover:translate-y-[-1px] hover:opacity-90"
                         } ${block.description ? "ring-1 ring-primary/40" : ""}`}
                         style={{
                           ...getBlockStyle(block),
@@ -163,11 +163,13 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
                         onMouseEnter={() => setHoveredBlock(block)}
                         onMouseLeave={() => setHoveredBlock(null)}
                         onClick={() => handleBlockClick(block)}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.4, ease: "easeOut" }}
-                        layout
+                        layoutId={`block-${block.id}`}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 30,
+                          duration: 0.4,
+                        }}
                         whileHover={{ y: -1 }}
                         whileTap={{ scale: 0.98 }}
                       />
@@ -226,7 +228,7 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
                   <motion.div
-                    className="h-3 w-3 rounded-full border border-border/30"
+                    className="h-3 w-3 rounded-full"
                     style={{
                       background:
                         category.id === "university"
@@ -250,7 +252,7 @@ export default function TimelineView({ data, categories, viewType }: TimelineVie
               transition={{ duration: 0.3, delay: categories.length * 0.05 }}
             >
               <motion.div
-                className="h-3 w-3 rounded-full border border-border/10"
+                className="h-3 w-3 rounded-full"
                 style={{
                   background:
                     theme === "dark"

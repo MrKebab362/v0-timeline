@@ -151,11 +151,12 @@ export default function TimeTracker() {
 
           <motion.span
             className="text-lg font-medium ml-2"
-            key={displayDate}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.3 }}
+            layoutId="date-display"
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+            }}
           >
             {displayDate}
           </motion.span>
@@ -175,11 +176,13 @@ export default function TimeTracker() {
 
       {/* 2. Replace the AnimatePresence and conditional rendering for TimelineView with: */}
       <motion.div
-        key={`${viewType}-${selectedDate.toISOString()}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
+        layout
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 30,
+          duration: 0.3,
+        }}
       >
         <TimelineView data={data} categories={categories} viewType={viewType} />
       </motion.div>
@@ -187,22 +190,26 @@ export default function TimeTracker() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* 3. Replace the AnimatePresence and conditional rendering for TimeBreakdown with: */}
         <motion.div
-          key={`time-${selectedDate.toISOString()}-${viewType}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          layout
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+            duration: 0.3,
+          }}
         >
           <TimeBreakdown data={data} />
         </motion.div>
 
         {/* 4. Replace the AnimatePresence and conditional rendering for CategoryBreakdown with: */}
         <motion.div
-          key={`category-${selectedDate.toISOString()}-${viewType}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
+          layout
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+            duration: 0.3,
+          }}
         >
           <CategoryBreakdown data={data} categories={categories} />
         </motion.div>

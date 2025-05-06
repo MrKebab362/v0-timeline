@@ -68,14 +68,13 @@ export default function CategoryBreakdown({ data, categories }: CategoryBreakdow
             <motion.div
               key={stat.id}
               className="space-y-1"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
+              layoutId={`category-${stat.id}`}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <motion.div
-                    className="h-3 w-3 rounded-full border border-border/30"
+                    className="h-3 w-3 rounded-full"
                     style={{
                       background:
                         stat.id === "university"
@@ -92,8 +91,19 @@ export default function CategoryBreakdown({ data, categories }: CategoryBreakdow
                   <span>{stat.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span>{stat.time}</span>
-                  <span className="text-sm text-muted-foreground">{stat.percentage}%</span>
+                  <motion.span
+                    layoutId={`time-${stat.id}`}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    {stat.time}
+                  </motion.span>
+                  <motion.span
+                    className="text-sm text-muted-foreground"
+                    layoutId={`percentage-${stat.id}`}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    {stat.percentage}%
+                  </motion.span>
                 </div>
               </div>
               <div className="h-2 w-full rounded-full bg-muted/50">
@@ -109,9 +119,16 @@ export default function CategoryBreakdown({ data, categories }: CategoryBreakdow
                             ? "linear-gradient(135deg, #6BB536 0%, #7FC84A 100%)"
                             : "linear-gradient(135deg, #A23BC9 0%, #B44FD8 100%)",
                   }}
-                  initial={{ width: 0 }}
+                  initial={false}
                   animate={{ width: `${stat.percentage}%` }}
-                  transition={{ duration: 0.8, delay: index * 0.1 + 0.2, ease: "easeOut" }}
+                  transition={{
+                    duration: 0.8,
+                    ease: "easeInOut",
+                    type: "spring",
+                    stiffness: 60,
+                    damping: 15,
+                  }}
+                  layoutId={`bar-${stat.id}`}
                 />
               </div>
             </motion.div>

@@ -69,7 +69,6 @@ export default function TimeBreakdown({ data }: TimeBreakdownProps) {
                 <motion.circle
                   className="text-primary"
                   strokeWidth="8"
-                  strokeDasharray={`${productivePercentage * 2.51} 251`}
                   strokeLinecap="round"
                   stroke="currentColor"
                   fill="transparent"
@@ -80,18 +79,22 @@ export default function TimeBreakdown({ data }: TimeBreakdownProps) {
                   style={{
                     filter: "drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.1))",
                   }}
-                  initial={{ strokeDasharray: "0 251" }}
+                  initial={false}
                   animate={{ strokeDasharray: `${productivePercentage * 2.51} 251` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
+                  transition={{
+                    duration: 0.8,
+                    ease: "easeInOut",
+                    type: "spring",
+                    stiffness: 60,
+                    damping: 15,
+                  }}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <motion.span
                   className="text-3xl font-bold"
-                  key={productivePercentage}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5, delay: 0.5 }}
+                  layoutId="percentage-text"
+                  transition={{ type: "spring", stiffness: 200, damping: 30 }}
                 >
                   {productivePercentage}%
                 </motion.span>
@@ -103,34 +106,28 @@ export default function TimeBreakdown({ data }: TimeBreakdownProps) {
           <div className="grid grid-cols-2 gap-4">
             <motion.div
               className="rounded-lg border p-4 shadow-sm"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
+              layoutId="productive-time-card"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               <div className="text-sm text-muted-foreground">Productive Time</div>
               <motion.div
                 className="text-xl font-semibold"
-                key={productiveTime}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, delay: 0.3 }}
+                layoutId="productive-time-text"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
                 {productiveTime}
               </motion.div>
             </motion.div>
             <motion.div
               className="rounded-lg border p-4 shadow-sm"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
+              layoutId="idle-time-card"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               <div className="text-sm text-muted-foreground">Idle Time</div>
               <motion.div
                 className="text-xl font-semibold"
-                key={idleTime}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, delay: 0.4 }}
+                layoutId="idle-time-text"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
                 {idleTime}
               </motion.div>
